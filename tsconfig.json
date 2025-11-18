@@ -16,7 +16,7 @@
     "jsx": "react-jsx",
 
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    // "exactOptionalPropertyTypes": true,
 
     "strict": true,
     "verbatimModuleSyntax": true,

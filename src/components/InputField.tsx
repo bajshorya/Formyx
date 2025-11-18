@@ -1,6 +1,7 @@
 import React from "react";
 import type { FieldValue, ValidatedFieldConfig, FormData } from "../types";
 
+// Extend with common HTML input attributes
 interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   value: FieldValue;
   onChange: (name: string, value: FieldValue, shouldValidate?: boolean) => void;
@@ -10,6 +11,18 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   formData?: FormData;
   className?: string;
   style?: React.CSSProperties;
+  // Add common HTML input attributes
+  placeholder?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  autoFocus?: boolean;
+  autoComplete?: string;
+  min?: number | string;
+  max?: number | string;
+  step?: number | string;
+  pattern?: string;
+  rows?: number; // For textarea
+  accept?: string; // For file input
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -27,6 +40,17 @@ const InputField: React.FC<InputFieldProps> = ({
   onBlur,
   className = "",
   style,
+  placeholder,
+  disabled = false,
+  readOnly = false,
+  autoFocus = false,
+  autoComplete,
+  min,
+  max,
+  step,
+  pattern,
+  rows = 4,
+  accept,
   ...props
 }) => {
   const handleChange = (
@@ -84,12 +108,24 @@ const InputField: React.FC<InputFieldProps> = ({
       className: getInputClassName(),
       style,
       required,
+      placeholder,
+      disabled,
+      readOnly,
+      autoFocus,
+      autoComplete,
+      min,
+      max,
+      step,
+      pattern,
+      accept,
       ...props,
     };
 
     switch (type) {
       case "textarea":
-        return <textarea {...commonProps} value={value as string} rows={4} />;
+        return (
+          <textarea {...commonProps} value={value as string} rows={rows} />
+        );
 
       case "select":
         return (
@@ -122,6 +158,7 @@ const InputField: React.FC<InputFieldProps> = ({
                   onBlur={handleBlur}
                   className={getInputClassName()}
                   required={required}
+                  disabled={disabled}
                 />
                 <span>{option.label}</span>
               </label>
@@ -136,6 +173,7 @@ const InputField: React.FC<InputFieldProps> = ({
             type="file"
             multiple={multiple}
             value={undefined}
+            accept={accept}
           />
         );
 
