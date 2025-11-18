@@ -14,6 +14,7 @@ const Formyx = () => {
 
 export { Formyx, Form, InputField };
 
+// Export types
 export type {
   FieldConfig,
   InputType,
@@ -26,6 +27,3 @@ export type {
   FormConfig,
   InputFieldProps,
 } from "./types";
-
-// Default export
-export default Formyx;

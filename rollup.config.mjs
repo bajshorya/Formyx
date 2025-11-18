@@ -3,6 +3,7 @@ import typescript from "@rollup/plugin-typescript";
 import commonjs from "@rollup/plugin-commonjs";
 import dts from "rollup-plugin-dts";
 import postcss from "rollup-plugin-postcss";
+import { isExportSpecifier } from "typescript";
 
 const mainConfig = {
   input: "src/index.tsx",
@@ -11,11 +12,13 @@ const mainConfig = {
       file: "dist/cjs/index.js",
       format: "cjs",
       sourcemap: true,
+      exports: "named",
     },
     {
       file: "dist/esm/index.esm.js",
       format: "esm",
       sourcemap: true,
+      exports: "named",
     },
   ],
   plugins: [

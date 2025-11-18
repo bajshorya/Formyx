@@ -1,4 +1,4 @@
-import require$$0 from 'react';
+import require$$0, { useState } from 'react';
 
 var jsxRuntime = {exports: {}};
 
@@ -422,13 +422,191 @@ function requireJsxRuntime () {
 
 var jsxRuntimeExports = requireJsxRuntime();
 
+const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, ...props }) => {
+    const handleChange = (event) => {
+        let newValue;
+        switch (type) {
+            case "checkbox":
+                newValue = event.target.checked;
+                break;
+            case "file":
+                newValue = event.target.files;
+                break;
+            case "number":
+                newValue = event.target.value === "" ? "" : Number(event.target.value);
+                break;
+            case "select":
+                if (multiple) {
+                    const selectedOptions = Array.from(event.target.selectedOptions);
+                    newValue = selectedOptions.map((option) => option.value);
+                }
+                else {
+                    newValue = event.target.value;
+                }
+                break;
+            default:
+                newValue = event.target.value;
+        }
+        onChange(name, newValue, true);
+    };
+    const handleBlur = () => {
+        onBlur(name, true);
+    };
+    const getInputClassName = () => {
+        const baseClass = "formyx-input";
+        const stateClass = error && touched ? "formyx-input-error" : "";
+        return `${baseClass} ${stateClass} ${className}`.trim();
+    };
+    // Render different input types
+    const renderInput = () => {
+        const commonProps = {
+            name,
+            value: type === "checkbox" ? undefined : value,
+            checked: type === "checkbox" ? Boolean(value) : undefined,
+            onChange: handleChange,
+            onBlur: handleBlur,
+            className: getInputClassName(),
+            style,
+            required,
+            placeholder,
+            disabled,
+            readOnly,
+            autoFocus,
+            autoComplete,
+            min,
+            max,
+            step,
+            pattern,
+            accept,
+            ...props,
+        };
+        switch (type) {
+            case "textarea":
+                return (jsxRuntimeExports.jsx("textarea", { ...commonProps, value: value, rows: rows }));
+            case "select":
+                return (jsxRuntimeExports.jsxs("select", { ...commonProps, value: value, multiple: multiple, children: [jsxRuntimeExports.jsx("option", { value: "", children: "Select an option" }), options.map((option, index) => (jsxRuntimeExports.jsx("option", { value: option.value, children: option.label }, index)))] }));
+            case "checkbox":
+                return (jsxRuntimeExports.jsx("input", { ...commonProps, type: "checkbox", checked: Boolean(value) }));
+            case "radio":
+                return (jsxRuntimeExports.jsx("div", { className: "formyx-radio-group", children: options.map((option, index) => (jsxRuntimeExports.jsxs("label", { className: "formyx-radio-label", children: [jsxRuntimeExports.jsx("input", { type: "radio", name: name, value: option.value, checked: value === option.value, onChange: handleChange, onBlur: handleBlur, className: getInputClassName(), required: required, disabled: disabled }), jsxRuntimeExports.jsx("span", { children: option.label })] }, index))) }));
+            case "file":
+                return (jsxRuntimeExports.jsx("input", { ...commonProps, type: "file", multiple: multiple, value: undefined, accept: accept }));
+            default:
+                return (jsxRuntimeExports.jsx("input", { ...commonProps, type: type, value: value }));
+        }
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: `formyx-field formyx-field-${type}`, children: [label && (jsxRuntimeExports.jsxs("label", { htmlFor: name, className: "formyx-label", children: [label, required && jsxRuntimeExports.jsx("span", { className: "formyx-required", children: "*" })] })), renderInput(), error && touched && jsxRuntimeExports.jsx("div", { className: "formyx-error-message", children: error })] }));
+};
+
 const Form = () => {
-    return (jsxRuntimeExports.jsx("div", { children: jsxRuntimeExports.jsxs("form", { className: "formyx-form", children: [jsxRuntimeExports.jsxs("div", { className: "formyx-field", children: [jsxRuntimeExports.jsx("label", { className: "formyx-label", children: "Test Field" }), jsxRuntimeExports.jsx("input", { type: "text", className: "formyx-input", placeholder: "Enter text" })] }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit" })] }) }));
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        password: "",
+        age: "",
+        bio: "",
+        country: "",
+        subscribe: false,
+        gender: "",
+        avatar: null,
+    });
+    const [touched, setTouched] = useState({});
+    const [errors, setErrors] = useState({});
+    const handleChange = (name, value, shouldValidate = true) => {
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+        if (shouldValidate) {
+            validateField(name, value);
+        }
+    };
+    const handleBlur = (name, isTouched = true) => {
+        if (isTouched) {
+            setTouched((prev) => ({
+                ...prev,
+                [name]: true,
+            }));
+            validateField(name, formData[name]);
+        }
+    };
+    const validateField = (name, value) => {
+        let error = "";
+        switch (name) {
+            case "username":
+                if (!value)
+                    error = "Username is required";
+                else if (value.length < 3)
+                    error = "Username must be at least 3 characters";
+                break;
+            case "email":
+                if (!value)
+                    error = "Email is required";
+                else if (!/\S+@\S+\.\S+/.test(value))
+                    error = "Email is invalid";
+                break;
+            case "password":
+                if (!value)
+                    error = "Password is required";
+                else if (value.length < 6)
+                    error = "Password must be at least 6 characters";
+                break;
+            case "age":
+                if (value && (Number(value) < 18 || Number(value) > 100)) {
+                    error = "Age must be between 18 and 100";
+                }
+                break;
+            case "country":
+                if (!value)
+                    error = "Please select a country";
+                break;
+        }
+        setErrors((prev) => ({
+            ...prev,
+            [name]: error,
+        }));
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const allTouched = Object.keys(formData).reduce((acc, key) => {
+            acc[key] = true;
+            return acc;
+        }, {});
+        setTouched(allTouched);
+        Object.keys(formData).forEach((key) => {
+            validateField(key, formData[key]);
+        });
+        const hasErrors = Object.values(errors).some((error) => error);
+        if (!hasErrors) {
+            console.log("Form submitted:", formData);
+            alert("Form submitted successfully!");
+        }
+        else {
+            alert("Please fix the errors before submitting.");
+        }
+    };
+    const countryOptions = [
+        { label: "United States", value: "us" },
+        { label: "Canada", value: "ca" },
+        { label: "United Kingdom", value: "uk" },
+        { label: "Australia", value: "au" },
+    ];
+    const genderOptions = [
+        { label: "Male", value: "male" },
+        { label: "Female", value: "female" },
+        { label: "Other", value: "other" },
+    ];
+    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Enter your username" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "Enter your email" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password" }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, placeholder: "Tell us about yourself" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] }), jsxRuntimeExports.jsxs("div", { style: {
+                    marginTop: "2rem",
+                    padding: "1rem",
+                    background: "#f5f5f5",
+                    borderRadius: "4px",
+                }, children: [jsxRuntimeExports.jsx("h3", { children: "Form Data (Debug):" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(formData, null, 2) }), jsxRuntimeExports.jsx("h3", { children: "Errors:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(errors, null, 2) }), jsxRuntimeExports.jsx("h3", { children: "Touched Fields:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(touched, null, 2) })] })] }));
 };
 
 const Formyx = () => {
     return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: ["Formyx Library", jsxRuntimeExports.jsx(Form, {})] }));
 };
 
-export { Form, Formyx };
+export { Form, Formyx, InputField };
 //# sourceMappingURL=index.esm.js.map
