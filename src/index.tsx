@@ -24,7 +24,7 @@ export type {
   ValidationResult,
   FormState,
   FormConfig,
-  InputFieldProps, // Add this export
+  InputFieldProps,
 } from "./types";
 
 // Default export
