@@ -85,11 +85,10 @@ interface FormyxProps {
 }
 interface FormProps {
 }
-interface InputFieldComponentProps {
-}
+
 declare const Formyx: React.ComponentType<FormyxProps>;
 declare const Form: React.ComponentType<FormProps>;
-declare const InputField: React.ComponentType<InputFieldComponentProps>;
+declare const InputField: React.ComponentType<InputFieldProps>;
 
 export { Form, Formyx, InputField };
-export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };
+export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldProps as InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };

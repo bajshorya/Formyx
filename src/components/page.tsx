@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import InputField from "./InputField";
 import type { FieldValue, FormData } from "../types";
 import { useDebounce, useThrottle } from "../hooks";
@@ -14,22 +14,65 @@ const Form = () => {
     subscribe: false,
     gender: "",
     avatar: null,
+    search: "",
+    priceRange: 50,
+    rating: 3,
   });
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [priceHistory, setPriceHistory] = useState<number[]>([]);
 
-  // Debounced form submission
-  const debouncedSubmit = useDebounce((data: FormData) => {
-    console.log("Form submitted:", data);
-    alert("Form submitted successfully!");
+  const debouncedEmailValidation = useDebounce((email: string) => {
+    validateEmailField(email);
   }, 500);
 
-  // Throttled search (example for search fields)
   const throttledSearch = useThrottle((query: string) => {
-    console.log("Searching for:", query);
-    // This would typically call an API
-  }, 1000);
+    if (query.length > 2) {
+      const mockResults = [
+        `Result for "${query}" 1`,
+        `Result for "${query}" 2`,
+        `Result for "${query}" 3`,
+      ];
+      setSearchResults(mockResults);
+      console.log("Searching for:", query);
+    } else {
+      setSearchResults([]);
+    }
+  }, 300);
+
+  const throttledPriceTracking = useThrottle((price: number) => {
+    setPriceHistory((prev) => [...prev.slice(-9), price]); // Keep last 10 values
+    console.log("Price changed to:", price);
+  }, 200);
+
+  const debouncedBioValidation = useDebounce((bio: string) => {
+    if (bio.length > 0) {
+      let error = "";
+      if (bio.length < 10) {
+        error = "Bio should be at least 10 characters";
+      } else if (bio.length > 500) {
+        error = "Bio should be less than 500 characters";
+      }
+      setErrors((prev) => ({ ...prev, bio: error }));
+    }
+  }, 400);
+
+  const validateEmailField = useCallback((email: string) => {
+    let error = "";
+
+    if (!email) {
+      error = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      error = "Email format is invalid (example: user@example.com)";
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      email: error,
+    }));
+  }, []);
 
   const handleChange = (
     name: string,
@@ -41,15 +84,65 @@ const Form = () => {
       [name]: value,
     }));
 
-    // Example: Use throttle for search-like fields
-    if (name === "username" && typeof value === "string" && value.length > 2) {
-      throttledSearch(value);
-    }
+    switch (name) {
+      case "email":
+        if (typeof value === "string") {
+          if (shouldValidate) {
+            let immediateError = "";
+            if (!value) immediateError = "Email is required";
+            setErrors((prev) => ({ ...prev, email: immediateError }));
+          }
 
-    if (shouldValidate) {
-      validateField(name, value);
+          if (value) {
+            debouncedEmailValidation(value);
+          } else {
+            setErrors((prev) => ({ ...prev, email: "" }));
+          }
+        }
+        break;
+
+      case "search":
+        if (typeof value === "string") {
+          throttledSearch(value);
+        }
+        break;
+
+      case "priceRange":
+        if (typeof value === "number") {
+          throttledPriceTracking(value);
+        }
+        break;
+
+      case "bio":
+        if (typeof value === "string") {
+          debouncedBioValidation(value);
+        }
+        break;
+
+      case "username":
+        if (typeof value === "string" && value.length > 2) {
+          throttledUsernameCheck(value);
+        }
+        break;
+
+      default:
+        if (shouldValidate) {
+          validateField(name, value);
+        }
+        break;
     }
   };
+
+  const throttledUsernameCheck = useThrottle((username: string) => {
+    console.log("Checking username availability:", username);
+    const takenUsernames = ["admin", "user", "test"];
+    if (takenUsernames.includes(username.toLowerCase())) {
+      setErrors((prev) => ({
+        ...prev,
+        username: "Username is already taken",
+      }));
+    }
+  }, 800);
 
   const handleBlur = (name: string, isTouched = true) => {
     if (isTouched) {
@@ -57,7 +150,12 @@ const Form = () => {
         ...prev,
         [name]: true,
       }));
-      validateField(name, formData[name]);
+
+      if (name === "email") {
+        validateEmailField(formData.email as string);
+      } else {
+        validateField(name, formData[name]);
+      }
     }
   };
 
@@ -69,12 +167,6 @@ const Form = () => {
         if (!value) error = "Username is required";
         else if ((value as string).length < 3)
           error = "Username must be at least 3 characters";
-        break;
-
-      case "email":
-        if (!value) error = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(value as string))
-          error = "Email is invalid";
         break;
 
       case "password":
@@ -93,6 +185,10 @@ const Form = () => {
         if (!value) error = "Please select a country";
         break;
 
+      case "rating":
+        if (!value) error = "Please select a rating";
+        break;
+
       default:
         break;
     }
@@ -103,10 +199,20 @@ const Form = () => {
     }));
   };
 
+  const debouncedSubmit = useDebounce((data: FormData) => {
+    console.log("Form submitted:", data);
+
+    validateEmailField(data.email as string);
+
+    const hasErrors = Object.values(errors).some((error) => error);
+    if (!hasErrors) {
+      alert("Form submitted successfully!");
+    }
+  }, 300);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched on submit
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
       return acc;
@@ -114,18 +220,15 @@ const Form = () => {
 
     setTouched(allTouched);
 
-    // Validate all fields
     Object.keys(formData).forEach((key) => {
-      validateField(key, formData[key]);
+      if (key === "email") {
+        validateEmailField(formData.email as string);
+      } else {
+        validateField(key, formData[key]);
+      }
     });
 
-    // Check if form is valid
-    const hasErrors = Object.values(errors).some((error) => error);
-    if (!hasErrors) {
-      debouncedSubmit(formData);
-    } else {
-      alert("Please fix the errors before submitting.");
-    }
+    debouncedSubmit(formData);
   };
 
   const countryOptions = [
@@ -133,6 +236,18 @@ const Form = () => {
     { label: "Canada", value: "ca" },
     { label: "United Kingdom", value: "uk" },
     { label: "Australia", value: "au" },
+    { label: "Germany", value: "de" },
+    { label: "France", value: "fr" },
+    { label: "India", value: "in" },
+    { label: "Japan", value: "jp" },
+    { label: "China", value: "cn" },
+    { label: "Brazil", value: "br" },
+    { label: "South Africa", value: "za" },
+    { label: "Mexico", value: "mx" },
+    { label: "Italy", value: "it" },
+    { label: "Spain", value: "es" },
+    { label: "Netherlands", value: "nl" },
+    { label: "Other", value: "other" },
   ];
 
   const genderOptions = [
@@ -141,12 +256,19 @@ const Form = () => {
     { label: "Other", value: "other" },
   ];
 
+  const ratingOptions = [
+    { label: "⭐", value: "1" },
+    { label: "⭐⭐", value: "2" },
+    { label: "⭐⭐⭐", value: "3" },
+    { label: "⭐⭐⭐⭐", value: "4" },
+    { label: "⭐⭐⭐⭐⭐", value: "5" },
+  ];
+
   return (
     <div className="formyx-form">
       <h2>Formyx Demo Form</h2>
 
       <form onSubmit={handleSubmit}>
-        {/* Text Input with Debounced Validation */}
         <InputField
           name="username"
           type="text"
@@ -157,12 +279,11 @@ const Form = () => {
           error={errors.username}
           touched={touched.username}
           required
-          placeholder="Enter your username"
-          debounce={500}
-          validationStrategy="debounce"
+          placeholder="Choose a username"
+          throttle={800}
+          validationStrategy="throttle"
         />
 
-        {/* Email Input with Throttled Validation */}
         <InputField
           name="email"
           type="email"
@@ -173,12 +294,11 @@ const Form = () => {
           error={errors.email}
           touched={touched.email}
           required
-          placeholder="Enter your email"
-          throttle={1000}
-          validationStrategy="throttle"
+          placeholder="your.email@example.com"
+          debounce={500}
+          validationStrategy="debounce"
         />
 
-        {/* Password Input with Immediate Validation */}
         <InputField
           name="password"
           type="password"
@@ -193,7 +313,41 @@ const Form = () => {
           validationStrategy="immediate"
         />
 
-        {/* Number Input */}
+        <InputField
+          name="search"
+          type="text"
+          label="Search Products"
+          value={formData.search}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="Type to search..."
+          throttle={300}
+          validationStrategy="throttle"
+        />
+
+        <div className="formyx-field">
+          <label className="formyx-label">
+            {"Price Range: $" + String(formData.priceRange)}
+          </label>
+          <InputField
+            name="priceRange"
+            type={"range" as any}
+            value={formData.priceRange}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            min="0"
+            max="100"
+            step="5"
+            throttle={200}
+            validationStrategy="throttle"
+          />
+          <div
+            style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }}
+          >
+            Throttled tracking for analytics
+          </div>
+        </div>
+
         <InputField
           name="age"
           type="number"
@@ -204,9 +358,10 @@ const Form = () => {
           error={errors.age}
           touched={touched.age}
           placeholder="Enter your age"
+          min="18"
+          max="100"
         />
 
-        {/* Textarea */}
         <InputField
           name="bio"
           type="textarea"
@@ -214,11 +369,28 @@ const Form = () => {
           value={formData.bio}
           onChange={handleChange}
           onBlur={handleBlur}
-          placeholder="Tell us about yourself"
+          error={errors.bio}
+          touched={touched.bio}
+          placeholder="Tell us about yourself..."
           rows={3}
+          debounce={400}
+          validationStrategy="debounce"
         />
 
-        {/* Select Dropdown */}
+        <InputField
+          name="rating"
+          type="radio"
+          label="How would you rate our service?"
+          value={formData.rating}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.rating}
+          touched={touched.rating}
+          options={ratingOptions}
+          throttle={500}
+          validationStrategy="throttle"
+        />
+
         <InputField
           name="country"
           type="select"
@@ -232,7 +404,6 @@ const Form = () => {
           required
         />
 
-        {/* Radio Buttons */}
         <InputField
           name="gender"
           type="radio"
@@ -243,7 +414,6 @@ const Form = () => {
           options={genderOptions}
         />
 
-        {/* Checkbox */}
         <InputField
           name="subscribe"
           type="checkbox"
@@ -253,7 +423,6 @@ const Form = () => {
           onBlur={handleBlur}
         />
 
-        {/* File Input */}
         <InputField
           name="avatar"
           type="file"
@@ -261,6 +430,7 @@ const Form = () => {
           value={formData.avatar}
           onChange={handleChange}
           onBlur={handleBlur}
+          accept="image/*"
         />
 
         <button type="submit" className="formyx-submit-button">
@@ -276,12 +446,78 @@ const Form = () => {
           borderRadius: "4px",
         }}
       >
-        <h3>Form Data (Debug):</h3>
+        <h3>Form Data:</h3>
         <pre>{JSON.stringify(formData, null, 2)}</pre>
-        <h3>Errors:</h3>
-        <pre>{JSON.stringify(errors, null, 2)}</pre>
-        <h3>Touched Fields:</h3>
-        <pre>{JSON.stringify(touched, null, 2)}</pre>
+
+        <h3>Validation Status:</h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "1rem",
+          }}
+        >
+          <div>
+            <h4>Errors:</h4>
+            <pre>{JSON.stringify(errors, null, 2)}</pre>
+          </div>
+          <div>
+            <h4>Touched Fields:</h4>
+            <pre>{JSON.stringify(touched, null, 2)}</pre>
+          </div>
+        </div>
+
+        {searchResults.length > 0 && (
+          <div>
+            <h4>Search Results (Throttled):</h4>
+            <ul>
+              {searchResults.map((result, index) => (
+                <li key={index}>{result}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {priceHistory.length > 0 && (
+          <div>
+            <h4>Price History (Throttled):</h4>
+            <div>Recent values: {priceHistory.join(" → ")}</div>
+          </div>
+        )}
+
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#e8f4fd",
+            borderRadius: "4px",
+          }}
+        >
+          <h4>Performance Strategies Applied:</h4>
+          <ul>
+            <li>
+              ✅ <strong>Email</strong>: Debounced validation (500ms)
+            </li>
+            <li>
+              ✅ <strong>Username</strong>: Throttled availability check (800ms)
+            </li>
+            <li>
+              ✅ <strong>Search</strong>: Throttled API calls (300ms)
+            </li>
+            <li>
+              ✅ <strong>Price Range</strong>: Throttled analytics (200ms)
+            </li>
+            <li>
+              ✅ <strong>Bio</strong>: Debounced length validation (400ms)
+            </li>
+            <li>
+              ✅ <strong>Rating</strong>: Throttled feedback (500ms)
+            </li>
+            <li>
+              ✅ <strong>Password</strong>: Immediate validation
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
