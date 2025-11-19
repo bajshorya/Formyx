@@ -64,8 +64,8 @@ interface ValidatedFieldConfig extends FieldConfig {
 // Validation result
 interface ValidationResult {
   isValid: boolean;
-  errors: Record<string, string | undefined>;
-  touched: Record<string, boolean>;
+  errors: Record<string, string | undefined>; // this maps field names to error messages, where names are keys and error messages are values, example { username: "Username is required", email: undefined }
+  touched: Record<string, boolean>; // this maps field names to touched status, where names are keys and booleans are values, example { username: true, email: false }
 }
 
 // Form state

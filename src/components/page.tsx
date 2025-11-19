@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import InputField from "./InputField";
 import type { FieldValue, FormData } from "../types";
+import { useDebounce, useThrottle } from "../hooks";
 
 const Form = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -18,6 +19,18 @@ const Form = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Debounced form submission
+  const debouncedSubmit = useDebounce((data: FormData) => {
+    console.log("Form submitted:", data);
+    alert("Form submitted successfully!");
+  }, 500);
+
+  // Throttled search (example for search fields)
+  const throttledSearch = useThrottle((query: string) => {
+    console.log("Searching for:", query);
+    // This would typically call an API
+  }, 1000);
+
   const handleChange = (
     name: string,
     value: FieldValue,
@@ -27,6 +40,11 @@ const Form = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Example: Use throttle for search-like fields
+    if (name === "username" && typeof value === "string" && value.length > 2) {
+      throttledSearch(value);
+    }
 
     if (shouldValidate) {
       validateField(name, value);
@@ -88,6 +106,7 @@ const Form = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Mark all fields as touched on submit
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
       return acc;
@@ -95,14 +114,15 @@ const Form = () => {
 
     setTouched(allTouched);
 
+    // Validate all fields
     Object.keys(formData).forEach((key) => {
       validateField(key, formData[key]);
     });
 
+    // Check if form is valid
     const hasErrors = Object.values(errors).some((error) => error);
     if (!hasErrors) {
-      console.log("Form submitted:", formData);
-      alert("Form submitted successfully!");
+      debouncedSubmit(formData);
     } else {
       alert("Please fix the errors before submitting.");
     }
@@ -126,6 +146,7 @@ const Form = () => {
       <h2>Formyx Demo Form</h2>
 
       <form onSubmit={handleSubmit}>
+        {/* Text Input with Debounced Validation */}
         <InputField
           name="username"
           type="text"
@@ -137,8 +158,11 @@ const Form = () => {
           touched={touched.username}
           required
           placeholder="Enter your username"
+          debounce={500}
+          validationStrategy="debounce"
         />
 
+        {/* Email Input with Throttled Validation */}
         <InputField
           name="email"
           type="email"
@@ -150,8 +174,11 @@ const Form = () => {
           touched={touched.email}
           required
           placeholder="Enter your email"
+          throttle={1000}
+          validationStrategy="throttle"
         />
 
+        {/* Password Input with Immediate Validation */}
         <InputField
           name="password"
           type="password"
@@ -163,8 +190,10 @@ const Form = () => {
           touched={touched.password}
           required
           placeholder="Enter your password"
+          validationStrategy="immediate"
         />
 
+        {/* Number Input */}
         <InputField
           name="age"
           type="number"
@@ -177,6 +206,7 @@ const Form = () => {
           placeholder="Enter your age"
         />
 
+        {/* Textarea */}
         <InputField
           name="bio"
           type="textarea"
@@ -185,8 +215,10 @@ const Form = () => {
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder="Tell us about yourself"
+          rows={3}
         />
 
+        {/* Select Dropdown */}
         <InputField
           name="country"
           type="select"
@@ -200,6 +232,7 @@ const Form = () => {
           required
         />
 
+        {/* Radio Buttons */}
         <InputField
           name="gender"
           type="radio"
@@ -210,6 +243,7 @@ const Form = () => {
           options={genderOptions}
         />
 
+        {/* Checkbox */}
         <InputField
           name="subscribe"
           type="checkbox"
@@ -219,6 +253,7 @@ const Form = () => {
           onBlur={handleBlur}
         />
 
+        {/* File Input */}
         <InputField
           name="avatar"
           type="file"

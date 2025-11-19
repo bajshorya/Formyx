@@ -3,7 +3,6 @@ import typescript from "@rollup/plugin-typescript";
 import commonjs from "@rollup/plugin-commonjs";
 import dts from "rollup-plugin-dts";
 import postcss from "rollup-plugin-postcss";
-import { isExportSpecifier } from "typescript";
 
 const mainConfig = {
   input: "src/index.tsx",
@@ -28,12 +27,7 @@ const mainConfig = {
     commonjs(),
     typescript({
       tsconfig: "./tsconfig.json",
-      exclude: [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/*.stories.tsx",
-        "**/*.css",
-      ],
+      exclude: ["**/*.css"],
       declaration: false,
       declarationMap: false,
     }),

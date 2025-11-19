@@ -1,7 +1,7 @@
 import React from "react";
 import type { FieldValue, ValidatedFieldConfig, FormData } from "../types";
+import { useDebounce, useThrottle } from "../hooks";
 
-// Extend with common HTML input attributes
 interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   value: FieldValue;
   onChange: (name: string, value: FieldValue, shouldValidate?: boolean) => void;
@@ -11,7 +11,7 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   formData?: FormData;
   className?: string;
   style?: React.CSSProperties;
-  // Add common HTML input attributes
+  // HTML attributes
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
@@ -21,8 +21,12 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   max?: number | string;
   step?: number | string;
   pattern?: string;
-  rows?: number; // For textarea
-  accept?: string; // For file input
+  rows?: number;
+  accept?: string;
+  // Performance options
+  debounce?: number; // Delay in ms for debounced validation
+  throttle?: number; // Delay in ms for throttled validation
+  validationStrategy?: "debounce" | "throttle" | "immediate"; // Default: 'debounce'
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -51,8 +55,21 @@ const InputField: React.FC<InputFieldProps> = ({
   pattern,
   rows = 4,
   accept,
+  debounce = 300,
+  throttle = 300,
+  validationStrategy = "debounce",
   ...props
 }) => {
+  // Create debounced version of onChange for validation
+  const debouncedValidation = useDebounce((name: string, value: FieldValue) => {
+    onChange(name, value, true);
+  }, debounce);
+
+  // Create throttled version of onChange for validation
+  const throttledValidation = useThrottle((name: string, value: FieldValue) => {
+    onChange(name, value, true);
+  }, throttle);
+
   const handleChange = (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -84,11 +101,32 @@ const InputField: React.FC<InputFieldProps> = ({
         newValue = event.target.value;
     }
 
-    onChange(name, newValue, true);
+    // Immediate update for UI responsiveness
+    onChange(name, newValue, false);
+
+    // Apply validation strategy
+    if (type !== "checkbox" && type !== "radio" && type !== "file") {
+      switch (validationStrategy) {
+        case "debounce":
+          debouncedValidation(name, newValue);
+          break;
+        case "throttle":
+          throttledValidation(name, newValue);
+          break;
+        case "immediate":
+          onChange(name, newValue, true);
+          break;
+      }
+    } else {
+      // Immediate validation for checkboxes, radios, files
+      onChange(name, newValue, true);
+    }
   };
 
   const handleBlur = () => {
     onBlur(name, true);
+    // Immediate validation on blur
+    onChange(name, value, true);
   };
 
   const getInputClassName = () => {

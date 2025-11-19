@@ -1,4 +1,4 @@
-import require$$0, { useState } from 'react';
+import require$$0, { useRef, useCallback, useState } from 'react';
 
 var jsxRuntime = {exports: {}};
 
@@ -422,7 +422,51 @@ function requireJsxRuntime () {
 
 var jsxRuntimeExports = requireJsxRuntime();
 
-const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, ...props }) => {
+const useDebounce = (fn, delay = 1000) => {
+    const timeoutId = useRef(null);
+    return useCallback((...args) => {
+        if (timeoutId.current) {
+            clearTimeout(timeoutId.current);
+        }
+        timeoutId.current = setTimeout(() => {
+            fn(...args);
+            timeoutId.current = null;
+        }, delay);
+    }, [fn, delay]);
+};
+
+const useThrottle = (fn, delay = 1000) => {
+    const lastExecuted = useRef(0);
+    const timeoutId = useRef(null);
+    return useCallback((...args) => {
+        const now = Date.now();
+        const timeSinceLastExecution = now - lastExecuted.current;
+        if (timeSinceLastExecution >= delay) {
+            fn(...args);
+            lastExecuted.current = now;
+        }
+        else {
+            if (timeoutId.current) {
+                clearTimeout(timeoutId.current);
+            }
+            timeoutId.current = setTimeout(() => {
+                fn(...args);
+                lastExecuted.current = Date.now();
+                timeoutId.current = null;
+            }, delay - timeSinceLastExecution);
+        }
+    }, [fn, delay]);
+};
+
+const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = "debounce", ...props }) => {
+    // Create debounced version of onChange for validation
+    const debouncedValidation = useDebounce((name, value) => {
+        onChange(name, value, true);
+    }, debounce);
+    // Create throttled version of onChange for validation
+    const throttledValidation = useThrottle((name, value) => {
+        onChange(name, value, true);
+    }, throttle);
     const handleChange = (event) => {
         let newValue;
         switch (type) {
@@ -447,10 +491,31 @@ const InputField = ({ name, type = "text", label, value, options = [], multiple 
             default:
                 newValue = event.target.value;
         }
-        onChange(name, newValue, true);
+        // Immediate update for UI responsiveness
+        onChange(name, newValue, false);
+        // Apply validation strategy
+        if (type !== "checkbox" && type !== "radio" && type !== "file") {
+            switch (validationStrategy) {
+                case "debounce":
+                    debouncedValidation(name, newValue);
+                    break;
+                case "throttle":
+                    throttledValidation(name, newValue);
+                    break;
+                case "immediate":
+                    onChange(name, newValue, true);
+                    break;
+            }
+        }
+        else {
+            // Immediate validation for checkboxes, radios, files
+            onChange(name, newValue, true);
+        }
     };
     const handleBlur = () => {
         onBlur(name, true);
+        // Immediate validation on blur
+        onChange(name, value, true);
     };
     const getInputClassName = () => {
         const baseClass = "formyx-input";
@@ -512,11 +577,25 @@ const Form = () => {
     });
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
+    // Debounced form submission
+    const debouncedSubmit = useDebounce((data) => {
+        console.log("Form submitted:", data);
+        alert("Form submitted successfully!");
+    }, 500);
+    // Throttled search (example for search fields)
+    const throttledSearch = useThrottle((query) => {
+        console.log("Searching for:", query);
+        // This would typically call an API
+    }, 1000);
     const handleChange = (name, value, shouldValidate = true) => {
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
+        // Example: Use throttle for search-like fields
+        if (name === "username" && typeof value === "string" && value.length > 2) {
+            throttledSearch(value);
+        }
         if (shouldValidate) {
             validateField(name, value);
         }
@@ -568,18 +647,20 @@ const Form = () => {
     };
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Mark all fields as touched on submit
         const allTouched = Object.keys(formData).reduce((acc, key) => {
             acc[key] = true;
             return acc;
         }, {});
         setTouched(allTouched);
+        // Validate all fields
         Object.keys(formData).forEach((key) => {
             validateField(key, formData[key]);
         });
+        // Check if form is valid
         const hasErrors = Object.values(errors).some((error) => error);
         if (!hasErrors) {
-            console.log("Form submitted:", formData);
-            alert("Form submitted successfully!");
+            debouncedSubmit(formData);
         }
         else {
             alert("Please fix the errors before submitting.");
@@ -596,7 +677,7 @@ const Form = () => {
         { label: "Female", value: "female" },
         { label: "Other", value: "other" },
     ];
-    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Enter your username" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "Enter your email" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password" }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, placeholder: "Tell us about yourself" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] }), jsxRuntimeExports.jsxs("div", { style: {
+    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Enter your username", debounce: 500, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "Enter your email", throttle: 1000, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password", validationStrategy: "immediate" }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, placeholder: "Tell us about yourself", rows: 3 }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] }), jsxRuntimeExports.jsxs("div", { style: {
                     marginTop: "2rem",
                     padding: "1rem",
                     background: "#f5f5f5",
@@ -604,9 +685,10 @@ const Form = () => {
                 }, children: [jsxRuntimeExports.jsx("h3", { children: "Form Data (Debug):" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(formData, null, 2) }), jsxRuntimeExports.jsx("h3", { children: "Errors:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(errors, null, 2) }), jsxRuntimeExports.jsx("h3", { children: "Touched Fields:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(touched, null, 2) })] })] }));
 };
 
+// Main component
 const Formyx = () => {
     return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: ["Formyx Library", jsxRuntimeExports.jsx(Form, {})] }));
 };
 
-export { Form, Formyx, InputField };
+export { Form, Formyx, InputField, useDebounce, useThrottle };
 //# sourceMappingURL=index.esm.js.map
