@@ -1,5 +1,5 @@
-import type { InputFieldProps } from "./types";
-import type { FC } from "react";
+import type { InputFieldProps } from './types';
+import type { FC } from 'react';
 
 export type {
   FieldConfig,
@@ -12,7 +12,7 @@ export type {
   FormState,
   FormConfig,
   InputFieldProps,
-} from "./types";
+} from './types';
 
 export type UseDebounce = <T extends unknown[]>(
   fn: (...args: T) => void,
