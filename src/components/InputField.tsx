@@ -11,7 +11,6 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   formData?: FormData;
   className?: string;
   style?: React.CSSProperties;
-  // HTML attributes
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
@@ -23,10 +22,9 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   pattern?: string;
   rows?: number;
   accept?: string;
-  // Performance options
-  debounce?: number; // Delay in ms for debounced validation
-  throttle?: number; // Delay in ms for throttled validation
-  validationStrategy?: "debounce" | "throttle" | "immediate"; // Default: 'debounce'
+  debounce?: number; 
+  throttle?: number; 
+  validationStrategy?: "debounce" | "throttle" | "immediate"; 
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -60,12 +58,10 @@ const InputField: React.FC<InputFieldProps> = ({
   validationStrategy = "debounce",
   ...props
 }) => {
-  // Create debounced version of onChange for validation
   const debouncedValidation = useDebounce((name: string, value: FieldValue) => {
     onChange(name, value, true);
   }, debounce);
 
-  // Create throttled version of onChange for validation
   const throttledValidation = useThrottle((name: string, value: FieldValue) => {
     onChange(name, value, true);
   }, throttle);
@@ -101,10 +97,8 @@ const InputField: React.FC<InputFieldProps> = ({
         newValue = event.target.value;
     }
 
-    // Immediate update for UI responsiveness
     onChange(name, newValue, false);
 
-    // Apply validation strategy
     if (type !== "checkbox" && type !== "radio" && type !== "file") {
       switch (validationStrategy) {
         case "debounce":
@@ -118,14 +112,12 @@ const InputField: React.FC<InputFieldProps> = ({
           break;
       }
     } else {
-      // Immediate validation for checkboxes, radios, files
       onChange(name, newValue, true);
     }
   };
 
   const handleBlur = () => {
     onBlur(name, true);
-    // Immediate validation on blur
     onChange(name, value, true);
   };
 
@@ -135,7 +127,6 @@ const InputField: React.FC<InputFieldProps> = ({
     return `${baseClass} ${stateClass} ${className}`.trim();
   };
 
-  // Render different input types
   const renderInput = () => {
     const commonProps = {
       name,

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 interface FieldConfig {
     name: string;
     label?: string;
@@ -87,8 +89,8 @@ interface FormProps {
 }
 
 declare const Formyx: React.ComponentType<FormyxProps>;
-declare const Form: React.ComponentType<FormProps>;
+declare const CustomForm: React.ComponentType<FormProps>;
 declare const InputField: React.ComponentType<InputFieldProps>;
 
-export { Form, Formyx, InputField };
+export { CustomForm, Formyx, InputField };
 export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldProps as InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };

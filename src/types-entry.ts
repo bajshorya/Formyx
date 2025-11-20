@@ -19,5 +19,5 @@ export interface FormProps {}
 export type { InputFieldProps as InputFieldComponentProps } from "./types";
 
 export declare const Formyx: React.ComponentType<FormyxProps>;
-export declare const Form: React.ComponentType<FormProps>;
+export declare const CustomForm: React.ComponentType<FormProps>;
 export declare const InputField: React.ComponentType<InputFieldProps>; // Use InputFieldProps here

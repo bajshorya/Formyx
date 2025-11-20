@@ -1,6 +1,6 @@
 {
   "name": "@shoryabaj/formyx",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A form validation Library for React built with TypeScript.",
   "license": "MIT",
   "author": "Shorya Baj",
@@ -19,18 +19,27 @@
   "homepage": "https://github.com/bajshorya/Formyx.git",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.esm.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/esm/index.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
     },
-    "./style": "./dist/formyx.css"
+    "./style": "./dist/formyx.css",
+    "./style.css": "./dist/formyx.css",
+    "./formyx.css": "./dist/formyx.css",
+    "./dist/formyx.css": "./dist/formyx.css"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "rollup --config",
-    "dev": "rollup --config --watch"
+    "dev": "rollup --config --watch",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.0",

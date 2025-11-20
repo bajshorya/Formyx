@@ -3,7 +3,7 @@ import InputField from "./InputField";
 import type { FieldValue, FormData } from "../types";
 import { useDebounce, useThrottle } from "../hooks";
 
-const Form = () => {
+const CustomForm = () => {
   const [formData, setFormData] = useState<FormData>({
     username: "",
     email: "",
@@ -43,7 +43,7 @@ const Form = () => {
   }, 300);
 
   const throttledPriceTracking = useThrottle((price: number) => {
-    setPriceHistory((prev) => [...prev.slice(-9), price]); // Keep last 10 values
+    setPriceHistory((prev) => [...prev.slice(-9), price]); 
     console.log("Price changed to:", price);
   }, 200);
 
@@ -437,90 +437,8 @@ const Form = () => {
           Submit Form
         </button>
       </form>
-
-      <div
-        style={{
-          marginTop: "2rem",
-          padding: "1rem",
-          background: "#f5f5f5",
-          borderRadius: "4px",
-        }}
-      >
-        <h3>Form Data:</h3>
-        <pre>{JSON.stringify(formData, null, 2)}</pre>
-
-        <h3>Validation Status:</h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1rem",
-          }}
-        >
-          <div>
-            <h4>Errors:</h4>
-            <pre>{JSON.stringify(errors, null, 2)}</pre>
-          </div>
-          <div>
-            <h4>Touched Fields:</h4>
-            <pre>{JSON.stringify(touched, null, 2)}</pre>
-          </div>
-        </div>
-
-        {searchResults.length > 0 && (
-          <div>
-            <h4>Search Results (Throttled):</h4>
-            <ul>
-              {searchResults.map((result, index) => (
-                <li key={index}>{result}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {priceHistory.length > 0 && (
-          <div>
-            <h4>Price History (Throttled):</h4>
-            <div>Recent values: {priceHistory.join(" → ")}</div>
-          </div>
-        )}
-
-        <div
-          style={{
-            marginTop: "1rem",
-            padding: "1rem",
-            background: "#e8f4fd",
-            borderRadius: "4px",
-          }}
-        >
-          <h4>Performance Strategies Applied:</h4>
-          <ul>
-            <li>
-              ✅ <strong>Email</strong>: Debounced validation (500ms)
-            </li>
-            <li>
-              ✅ <strong>Username</strong>: Throttled availability check (800ms)
-            </li>
-            <li>
-              ✅ <strong>Search</strong>: Throttled API calls (300ms)
-            </li>
-            <li>
-              ✅ <strong>Price Range</strong>: Throttled analytics (200ms)
-            </li>
-            <li>
-              ✅ <strong>Bio</strong>: Debounced length validation (400ms)
-            </li>
-            <li>
-              ✅ <strong>Rating</strong>: Throttled feedback (500ms)
-            </li>
-            <li>
-              ✅ <strong>Password</strong>: Immediate validation
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default Form;
+export default CustomForm;

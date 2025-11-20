@@ -25,6 +25,11 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "src/global.d.ts", "src/types/**/*"],
+  "include": [
+    "src/**/*",
+    "src/global.d.ts",
+    "src/types/**/*",
+    "src/css-exports.d.ts"
+  ],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx"]
 }

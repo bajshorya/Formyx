@@ -461,11 +461,9 @@ const useThrottle = (fn, delay = 1000) => {
 };
 
 const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = "debounce", ...props }) => {
-    // Create debounced version of onChange for validation
     const debouncedValidation = useDebounce((name, value) => {
         onChange(name, value, true);
     }, debounce);
-    // Create throttled version of onChange for validation
     const throttledValidation = useThrottle((name, value) => {
         onChange(name, value, true);
     }, throttle);
@@ -493,9 +491,7 @@ const InputField = ({ name, type = "text", label, value, options = [], multiple 
             default:
                 newValue = event.target.value;
         }
-        // Immediate update for UI responsiveness
         onChange(name, newValue, false);
-        // Apply validation strategy
         if (type !== "checkbox" && type !== "radio" && type !== "file") {
             switch (validationStrategy) {
                 case "debounce":
@@ -510,13 +506,11 @@ const InputField = ({ name, type = "text", label, value, options = [], multiple 
             }
         }
         else {
-            // Immediate validation for checkboxes, radios, files
             onChange(name, newValue, true);
         }
     };
     const handleBlur = () => {
         onBlur(name, true);
-        // Immediate validation on blur
         onChange(name, value, true);
     };
     const getInputClassName = () => {
@@ -524,7 +518,6 @@ const InputField = ({ name, type = "text", label, value, options = [], multiple 
         const stateClass = error && touched ? "formyx-input-error" : "";
         return `${baseClass} ${stateClass} ${className}`.trim();
     };
-    // Render different input types
     const renderInput = () => {
         const commonProps = {
             name,
@@ -565,7 +558,7 @@ const InputField = ({ name, type = "text", label, value, options = [], multiple 
     return (jsxRuntimeExports.jsxs("div", { className: `formyx-field formyx-field-${type}`, children: [label && (jsxRuntimeExports.jsxs("label", { htmlFor: name, className: "formyx-label", children: [label, required && jsxRuntimeExports.jsx("span", { className: "formyx-required", children: "*" })] })), renderInput(), error && touched && jsxRuntimeExports.jsx("div", { className: "formyx-error-message", children: error })] }));
 };
 
-const Form = () => {
+const CustomForm = () => {
     const [formData, setFormData] = require$$0.useState({
         username: "",
         email: "",
@@ -602,7 +595,7 @@ const Form = () => {
         }
     }, 300);
     const throttledPriceTracking = useThrottle((price) => {
-        setPriceHistory((prev) => [...prev.slice(-9), price]); // Keep last 10 values
+        setPriceHistory((prev) => [...prev.slice(-9), price]);
         console.log("Price changed to:", price);
     }, 200);
     const debouncedBioValidation = useDebounce((bio) => {
@@ -792,29 +785,14 @@ const Form = () => {
         { label: "⭐⭐⭐⭐", value: "4" },
         { label: "⭐⭐⭐⭐⭐", value: "5" },
     ];
-    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Choose a username", throttle: 800, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "your.email@example.com", debounce: 500, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password", validationStrategy: "immediate" }), jsxRuntimeExports.jsx(InputField, { name: "search", type: "text", label: "Search Products", value: formData.search, onChange: handleChange, onBlur: handleBlur, placeholder: "Type to search...", throttle: 300, validationStrategy: "throttle" }), jsxRuntimeExports.jsxs("div", { className: "formyx-field", children: [jsxRuntimeExports.jsx("label", { className: "formyx-label", children: "Price Range: $" + String(formData.priceRange) }), jsxRuntimeExports.jsx(InputField, { name: "priceRange", type: "range", value: formData.priceRange, onChange: handleChange, onBlur: handleBlur, min: "0", max: "100", step: "5", throttle: 200, validationStrategy: "throttle" }), jsxRuntimeExports.jsx("div", { style: { fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }, children: "Throttled tracking for analytics" })] }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age", min: "18", max: "100" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, error: errors.bio, touched: touched.bio, placeholder: "Tell us about yourself...", rows: 3, debounce: 400, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "rating", type: "radio", label: "How would you rate our service?", value: formData.rating, onChange: handleChange, onBlur: handleBlur, error: errors.rating, touched: touched.rating, options: ratingOptions, throttle: 500, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur, accept: "image/*" }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] }), jsxRuntimeExports.jsxs("div", { style: {
-                    marginTop: "2rem",
-                    padding: "1rem",
-                    background: "#f5f5f5",
-                    borderRadius: "4px",
-                }, children: [jsxRuntimeExports.jsx("h3", { children: "Form Data:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(formData, null, 2) }), jsxRuntimeExports.jsx("h3", { children: "Validation Status:" }), jsxRuntimeExports.jsxs("div", { style: {
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: "1rem",
-                        }, children: [jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h4", { children: "Errors:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(errors, null, 2) })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h4", { children: "Touched Fields:" }), jsxRuntimeExports.jsx("pre", { children: JSON.stringify(touched, null, 2) })] })] }), searchResults.length > 0 && (jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h4", { children: "Search Results (Throttled):" }), jsxRuntimeExports.jsx("ul", { children: searchResults.map((result, index) => (jsxRuntimeExports.jsx("li", { children: result }, index))) })] })), priceHistory.length > 0 && (jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h4", { children: "Price History (Throttled):" }), jsxRuntimeExports.jsxs("div", { children: ["Recent values: ", priceHistory.join(" → ")] })] })), jsxRuntimeExports.jsxs("div", { style: {
-                            marginTop: "1rem",
-                            padding: "1rem",
-                            background: "#e8f4fd",
-                            borderRadius: "4px",
-                        }, children: [jsxRuntimeExports.jsx("h4", { children: "Performance Strategies Applied:" }), jsxRuntimeExports.jsxs("ul", { children: [jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Email" }), ": Debounced validation (500ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Username" }), ": Throttled availability check (800ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Search" }), ": Throttled API calls (300ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Price Range" }), ": Throttled analytics (200ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Bio" }), ": Debounced length validation (400ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Rating" }), ": Throttled feedback (500ms)"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2705 ", jsxRuntimeExports.jsx("strong", { children: "Password" }), ": Immediate validation"] })] })] })] })] }));
+    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Choose a username", throttle: 800, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "your.email@example.com", debounce: 500, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password", validationStrategy: "immediate" }), jsxRuntimeExports.jsx(InputField, { name: "search", type: "text", label: "Search Products", value: formData.search, onChange: handleChange, onBlur: handleBlur, placeholder: "Type to search...", throttle: 300, validationStrategy: "throttle" }), jsxRuntimeExports.jsxs("div", { className: "formyx-field", children: [jsxRuntimeExports.jsx("label", { className: "formyx-label", children: "Price Range: $" + String(formData.priceRange) }), jsxRuntimeExports.jsx(InputField, { name: "priceRange", type: "range", value: formData.priceRange, onChange: handleChange, onBlur: handleBlur, min: "0", max: "100", step: "5", throttle: 200, validationStrategy: "throttle" }), jsxRuntimeExports.jsx("div", { style: { fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }, children: "Throttled tracking for analytics" })] }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age", min: "18", max: "100" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, error: errors.bio, touched: touched.bio, placeholder: "Tell us about yourself...", rows: 3, debounce: 400, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "rating", type: "radio", label: "How would you rate our service?", value: formData.rating, onChange: handleChange, onBlur: handleBlur, error: errors.rating, touched: touched.rating, options: ratingOptions, throttle: 500, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur, accept: "image/*" }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] })] }));
 };
 
-// Main component
 const Formyx = () => {
-    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: ["Formyx Library", jsxRuntimeExports.jsx(Form, {})] }));
+    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: ["Formyx Library", jsxRuntimeExports.jsx(CustomForm, {})] }));
 };
 
-exports.Form = Form;
+exports.CustomForm = CustomForm;
 exports.Formyx = Formyx;
 exports.InputField = InputField;
 exports.useDebounce = useDebounce;

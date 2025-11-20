@@ -4,6 +4,19 @@ import commonjs from "@rollup/plugin-commonjs";
 import dts from "rollup-plugin-dts";
 import postcss from "rollup-plugin-postcss";
 
+const cssConfig = {
+  input: "src/styles/formyx.css",
+  output: {
+    file: "dist/formyx.css",
+  },
+  plugins: [
+    postcss({
+      minimize: true,
+      extract: true,
+    }),
+  ],
+};
+
 const mainConfig = {
   input: "src/index.tsx",
   output: [
@@ -32,9 +45,10 @@ const mainConfig = {
       declarationMap: false,
     }),
     postcss({
+      minimize: true,
       extensions: [".css"],
       inject: false,
-      extract: "formyx.css",
+      extract: false,
     }),
   ],
   external: ["react", "react-dom"],
@@ -54,4 +68,4 @@ const typesConfig = {
   external: ["react", "react-dom", "*.css"],
 };
 
-export default [mainConfig, typesConfig];
+export default [cssConfig, mainConfig, typesConfig];
