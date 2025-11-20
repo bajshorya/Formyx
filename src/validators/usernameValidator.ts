@@ -17,10 +17,7 @@ export const usernameValidator: ValidatorFunction = (value) => {
   return undefined;
 };
 
-
-
 export const usernameValidationRule = {
   validate: usernameValidator,
   required: true,
 };
-
