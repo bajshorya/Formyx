@@ -460,7 +460,9 @@ const useThrottle = (fn, delay = 1000) => {
     }, [fn, delay]);
 };
 
-const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = "debounce", ...props }) => {
+const InputField = ({ name, type = "text", label, value, options = [], multiple = false, required = false, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+validation, error, touched = false, onChange, onBlur, className = "", style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = "debounce", ...props }) => {
     const debouncedValidation = useDebounce((name, value) => {
         onChange(name, value, true);
     }, debounce);
@@ -575,41 +577,10 @@ const Form = () => {
     });
     const [touched, setTouched] = require$$0.useState({});
     const [errors, setErrors] = require$$0.useState({});
-    const [searchResults, setSearchResults] = require$$0.useState([]);
-    const [priceHistory, setPriceHistory] = require$$0.useState([]);
-    const debouncedEmailValidation = useDebounce((email) => {
-        validateEmailField(email);
-    }, 500);
-    const throttledSearch = useThrottle((query) => {
-        if (query.length > 2) {
-            const mockResults = [
-                `Result for "${query}" 1`,
-                `Result for "${query}" 2`,
-                `Result for "${query}" 3`,
-            ];
-            setSearchResults(mockResults);
-            console.log("Searching for:", query);
-        }
-        else {
-            setSearchResults([]);
-        }
-    }, 300);
-    const throttledPriceTracking = useThrottle((price) => {
-        setPriceHistory((prev) => [...prev.slice(-9), price]);
-        console.log("Price changed to:", price);
-    }, 200);
-    const debouncedBioValidation = useDebounce((bio) => {
-        if (bio.length > 0) {
-            let error = "";
-            if (bio.length < 10) {
-                error = "Bio should be at least 10 characters";
-            }
-            else if (bio.length > 500) {
-                error = "Bio should be less than 500 characters";
-            }
-            setErrors((prev) => ({ ...prev, bio: error }));
-        }
-    }, 400);
+    // Remove unused variables
+    // const [searchResults, setSearchResults] = useState<string[]>([]);
+    // const [priceHistory, setPriceHistory] = useState<number[]>([]);
+    // Email validation function - move to top to avoid use-before-declaration
     const validateEmailField = require$$0.useCallback((email) => {
         let error = "";
         if (!email) {
@@ -623,8 +594,37 @@ const Form = () => {
             email: error,
         }));
     }, []);
+    // Debounced email validation
+    const debouncedEmailValidation = useDebounce((email) => {
+        validateEmailField(email);
+    }, 500);
+    // Throttled search API calls
+    const throttledSearch = useThrottle((query) => {
+        // Remove console.log
+        // console.log("Searching for:", query);
+        if (query.length > 2) ;
+    }, 300);
+    // Throttled price range tracking (for analytics/slider events)
+    const throttledPriceTracking = useThrottle((price) => {
+        // Implement analytics tracking here, e.g. send to analytics service.
+    }, 200);
+    // Debounced bio validation (for character count/quality check)
+    const debouncedBioValidation = useDebounce((bio) => {
+        if (bio.length > 0) {
+            let error = "";
+            if (bio.length < 10) {
+                error = "Bio should be at least 10 characters";
+            }
+            else if (bio.length > 500) {
+                error = "Bio should be less than 500 characters";
+            }
+            setErrors((prev) => ({ ...prev, bio: error }));
+        }
+    }, 400);
+    // Throttled username availability check
     const throttledUsernameCheck = useThrottle((username) => {
-        console.log("Checking username availability:", username);
+        // Simulate username availability API call - remove console.log
+        // console.log("Checking username availability:", username);
         const takenUsernames = ["admin", "user", "test"];
         if (takenUsernames.includes(username.toLowerCase())) {
             setErrors((prev) => ({
@@ -638,15 +638,19 @@ const Form = () => {
             ...prev,
             [name]: value,
         }));
+        // Apply different strategies based on input type
         switch (name) {
             case "email":
                 if (typeof value === "string") {
+                    // Immediate UI update for empty field
                     if (shouldValidate) {
                         let immediateError = "";
-                        if (!value)
+                        if (!value) {
                             immediateError = "Email is required";
+                        }
                         setErrors((prev) => ({ ...prev, email: immediateError }));
                     }
+                    // Debounced detailed validation
                     if (value) {
                         debouncedEmailValidation(value);
                     }
@@ -657,20 +661,24 @@ const Form = () => {
                 break;
             case "search":
                 if (typeof value === "string") {
+                    // Throttled search execution
                     throttledSearch(value);
                 }
                 break;
             case "priceRange":
                 if (typeof value === "number") {
+                    // Throttled price tracking for analytics
                     throttledPriceTracking(value);
                 }
                 break;
             case "bio":
                 if (typeof value === "string") {
+                    // Debounced bio validation
                     debouncedBioValidation(value);
                 }
                 break;
             case "username":
+                // Throttled username availability check (simulated)
                 if (typeof value === "string" && value.length > 2) {
                     throttledUsernameCheck(value);
                 }
@@ -688,6 +696,7 @@ const Form = () => {
                 ...prev,
                 [name]: true,
             }));
+            // Final validation on blur
             if (name === "email") {
                 validateEmailField(formData.email);
             }
@@ -700,16 +709,20 @@ const Form = () => {
         let error = "";
         switch (name) {
             case "username":
-                if (!value)
+                if (!value) {
                     error = "Username is required";
-                else if (value.length < 3)
+                }
+                else if (value.length < 3) {
                     error = "Username must be at least 3 characters";
+                }
                 break;
             case "password":
-                if (!value)
+                if (!value) {
                     error = "Password is required";
-                else if (value.length < 6)
+                }
+                else if (value.length < 6) {
                     error = "Password must be at least 6 characters";
+                }
                 break;
             case "age":
                 if (value && (Number(value) < 18 || Number(value) > 100)) {
@@ -717,12 +730,14 @@ const Form = () => {
                 }
                 break;
             case "country":
-                if (!value)
+                if (!value) {
                     error = "Please select a country";
+                }
                 break;
             case "rating":
-                if (!value)
+                if (!value) {
                     error = "Please select a rating";
+                }
                 break;
         }
         setErrors((prev) => ({
@@ -730,8 +745,11 @@ const Form = () => {
             [name]: error,
         }));
     };
+    // Debounced form submission
     const debouncedSubmit = useDebounce((data) => {
-        console.log("Form submitted:", data);
+        // Remove console.log
+        // console.log("Form submitted:", data);
+        // Final validation before submission
         validateEmailField(data.email);
         const hasErrors = Object.values(errors).some((error) => error);
         if (!hasErrors) {
@@ -740,11 +758,13 @@ const Form = () => {
     }, 300);
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Mark all fields as touched on submit
         const allTouched = Object.keys(formData).reduce((acc, key) => {
             acc[key] = true;
             return acc;
         }, {});
         setTouched(allTouched);
+        // Validate all fields before submission
         Object.keys(formData).forEach((key) => {
             if (key === "email") {
                 validateEmailField(formData.email);
@@ -760,18 +780,6 @@ const Form = () => {
         { label: "Canada", value: "ca" },
         { label: "United Kingdom", value: "uk" },
         { label: "Australia", value: "au" },
-        { label: "Germany", value: "de" },
-        { label: "France", value: "fr" },
-        { label: "India", value: "in" },
-        { label: "Japan", value: "jp" },
-        { label: "China", value: "cn" },
-        { label: "Brazil", value: "br" },
-        { label: "South Africa", value: "za" },
-        { label: "Mexico", value: "mx" },
-        { label: "Italy", value: "it" },
-        { label: "Spain", value: "es" },
-        { label: "Netherlands", value: "nl" },
-        { label: "Other", value: "other" },
     ];
     const genderOptions = [
         { label: "Male", value: "male" },
@@ -785,7 +793,7 @@ const Form = () => {
         { label: "⭐⭐⭐⭐", value: "4" },
         { label: "⭐⭐⭐⭐⭐", value: "5" },
     ];
-    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Choose a username", throttle: 800, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "your.email@example.com", debounce: 500, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password", validationStrategy: "immediate" }), jsxRuntimeExports.jsx(InputField, { name: "search", type: "text", label: "Search Products", value: formData.search, onChange: handleChange, onBlur: handleBlur, placeholder: "Type to search...", throttle: 300, validationStrategy: "throttle" }), jsxRuntimeExports.jsxs("div", { className: "formyx-field", children: [jsxRuntimeExports.jsx("label", { className: "formyx-label", children: "Price Range: $" + String(formData.priceRange) }), jsxRuntimeExports.jsx(InputField, { name: "priceRange", type: "range", value: formData.priceRange, onChange: handleChange, onBlur: handleBlur, min: "0", max: "100", step: "5", throttle: 200, validationStrategy: "throttle" }), jsxRuntimeExports.jsx("div", { style: { fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }, children: "Throttled tracking for analytics" })] }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age", min: "18", max: "100" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, error: errors.bio, touched: touched.bio, placeholder: "Tell us about yourself...", rows: 3, debounce: 400, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "rating", type: "radio", label: "How would you rate our service?", value: formData.rating, onChange: handleChange, onBlur: handleBlur, error: errors.rating, touched: touched.rating, options: ratingOptions, throttle: 500, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur, accept: "image/*" }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] })] }));
+    return (jsxRuntimeExports.jsxs("div", { className: "formyx-form", children: [jsxRuntimeExports.jsx("h2", { children: "Formyx Demo Form" }), jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, children: [jsxRuntimeExports.jsx(InputField, { name: "username", type: "text", label: "Username", value: formData.username, onChange: handleChange, onBlur: handleBlur, error: errors.username, touched: touched.username, required: true, placeholder: "Choose a username", throttle: 800, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "email", type: "email", label: "Email Address", value: formData.email, onChange: handleChange, onBlur: handleBlur, error: errors.email, touched: touched.email, required: true, placeholder: "your.email@example.com", debounce: 500, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "password", type: "password", label: "Password", value: formData.password, onChange: handleChange, onBlur: handleBlur, error: errors.password, touched: touched.password, required: true, placeholder: "Enter your password", validationStrategy: "immediate" }), jsxRuntimeExports.jsx(InputField, { name: "search", type: "text", label: "Search Products", value: formData.search, onChange: handleChange, onBlur: handleBlur, placeholder: "Type to search...", throttle: 300, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "age", type: "number", label: "Age", value: formData.age, onChange: handleChange, onBlur: handleBlur, error: errors.age, touched: touched.age, placeholder: "Enter your age", min: "18", max: "100" }), jsxRuntimeExports.jsx(InputField, { name: "bio", type: "textarea", label: "Bio", value: formData.bio, onChange: handleChange, onBlur: handleBlur, error: errors.bio, touched: touched.bio, placeholder: "Tell us about yourself...", rows: 3, debounce: 400, validationStrategy: "debounce" }), jsxRuntimeExports.jsx(InputField, { name: "rating", type: "radio", label: "How would you rate our service?", value: formData.rating, onChange: handleChange, onBlur: handleBlur, error: errors.rating, touched: touched.rating, options: ratingOptions, throttle: 500, validationStrategy: "throttle" }), jsxRuntimeExports.jsx(InputField, { name: "country", type: "select", label: "Country", value: formData.country, onChange: handleChange, onBlur: handleBlur, error: errors.country, touched: touched.country, options: countryOptions, required: true }), jsxRuntimeExports.jsx(InputField, { name: "gender", type: "radio", label: "Gender", value: formData.gender, onChange: handleChange, onBlur: handleBlur, options: genderOptions }), jsxRuntimeExports.jsx(InputField, { name: "subscribe", type: "checkbox", label: "Subscribe to newsletter", value: formData.subscribe, onChange: handleChange, onBlur: handleBlur }), jsxRuntimeExports.jsx(InputField, { name: "avatar", type: "file", label: "Profile Picture", value: formData.avatar, onChange: handleChange, onBlur: handleBlur, accept: "image/*" }), jsxRuntimeExports.jsx("button", { type: "submit", className: "formyx-submit-button", children: "Submit Form" })] })] }));
 };
 
 const Formyx = () => {

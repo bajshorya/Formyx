@@ -1,12 +1,14 @@
+import React, { FC } from 'react';
+
 interface FieldConfig {
     name: string;
     label?: string;
     required?: boolean;
-    validate?: (value: any, formData?: FormData) => string | undefined;
+    validate?: (value: unknown, formData?: FormData) => string | undefined;
     dependencies?: string[];
 }
 type InputType = "text" | "email" | "password" | "number" | "tel" | "url" | "textarea" | "select" | "checkbox" | "radio" | "file" | "date" | "datetime-local" | "custom";
-type FieldValue = string | number | boolean | File | FileList | any[] | null | undefined;
+type FieldValue = string | number | boolean | File | FileList | unknown[] | null | undefined;
 type FormData = Record<string, FieldValue>;
 interface ValidationRule {
     required?: boolean | string;
@@ -84,15 +86,11 @@ interface InputFieldProps {
     validationStrategy?: "debounce" | "throttle" | "immediate";
 }
 
-interface UseDebounce {
-    <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (...args: T) => void;
-}
-interface UseThrottle {
-    <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (...args: T) => void;
-}
-declare const Formyx: React.ComponentType<{}>;
-declare const Form: React.ComponentType<{}>;
-declare const InputField: React.ComponentType<InputFieldProps>;
+type UseDebounce = <T extends unknown[]>(fn: (...args: T) => void, delay?: number) => (...args: T) => void;
+type UseThrottle = <T extends unknown[]>(fn: (...args: T) => void, delay?: number) => (...args: T) => void;
+declare const Formyx: FC;
+declare const Form: FC;
+declare const InputField: FC<InputFieldProps>;
 declare const useDebounce: UseDebounce;
 declare const useThrottle: UseThrottle;
 
