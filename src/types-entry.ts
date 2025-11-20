@@ -28,6 +28,5 @@ export declare const Formyx: FC;
 export declare const Form: FC;
 export declare const InputField: FC<InputFieldProps>;
 
-// Export hooks
 export declare const useDebounce: UseDebounce;
 export declare const useThrottle: UseThrottle;
