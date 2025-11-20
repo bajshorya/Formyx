@@ -2,7 +2,7 @@ interface FieldConfig {
   name: string;
   label?: string;
   required?: boolean;
-  validate?: (value: any, formData?: FormData) => string | undefined;
+  validate?: (value: unknown, formData?: FormData) => string | undefined;
   dependencies?: string[];
 }
 
@@ -28,7 +28,7 @@ type FieldValue =
   | boolean
   | File
   | FileList
-  | any[]
+  | unknown[]
   | null
   | undefined;
 
