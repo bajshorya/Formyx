@@ -17,6 +17,19 @@ const cssConfig = {
   ],
 };
 
+const allStylesConfig = {
+  input: "src/styles/index.css",
+  output: {
+    file: "dist/all.css",
+  },
+  plugins: [
+    postcss({
+      minimize: true,
+      extract: true,
+    }),
+  ],
+};
+
 const mainConfig = {
   input: "src/index.tsx",
   output: [
@@ -68,4 +81,5 @@ const typesConfig = {
   external: ["react", "react-dom", "*.css"],
 };
 
-export default [cssConfig, mainConfig, typesConfig];
+// Only export core and all styles configs
+export default [cssConfig, allStylesConfig, mainConfig, typesConfig];

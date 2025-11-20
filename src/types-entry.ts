@@ -1,3 +1,5 @@
+import type { InputFieldProps } from "./types";
+
 export type {
   FieldConfig,
   InputType,
@@ -11,10 +13,21 @@ export type {
   InputFieldProps,
 } from "./types";
 
-export interface FormyxProps {}
-export interface FormProps {}
-export interface InputFieldComponentProps {}
+export interface UseDebounce {
+  <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (
+    ...args: T
+  ) => void;
+}
 
-export declare const Formyx: React.ComponentType<FormyxProps>;
-export declare const Form: React.ComponentType<FormProps>;
-export declare const InputField: React.ComponentType<InputFieldComponentProps>;
+export interface UseThrottle {
+  <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (
+    ...args: T
+  ) => void;
+}
+
+export declare const Formyx: React.ComponentType<{}>;
+export declare const Form: React.ComponentType<{}>;
+export declare const InputField: React.ComponentType<InputFieldProps>;
+
+export declare const useDebounce: UseDebounce;
+export declare const useThrottle: UseThrottle;

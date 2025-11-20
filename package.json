@@ -31,7 +31,9 @@
     "./style": "./dist/formyx.css",
     "./style.css": "./dist/formyx.css",
     "./formyx.css": "./dist/formyx.css",
-    "./dist/formyx.css": "./dist/formyx.css"
+    "./all": "./dist/all.css",
+    "./all.css": "./dist/all.css",
+    "./dist/*": "./dist/*"
   },
   "files": [
     "dist"

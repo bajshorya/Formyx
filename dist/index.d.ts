@@ -84,15 +84,17 @@ interface InputFieldProps {
     validationStrategy?: "debounce" | "throttle" | "immediate";
 }
 
-interface FormyxProps {
+interface UseDebounce {
+    <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (...args: T) => void;
 }
-interface FormProps {
+interface UseThrottle {
+    <T extends unknown[]>(fn: (...args: T) => void, delay?: number): (...args: T) => void;
 }
-interface InputFieldComponentProps {
-}
-declare const Formyx: React.ComponentType<FormyxProps>;
-declare const Form: React.ComponentType<FormProps>;
-declare const InputField: React.ComponentType<InputFieldComponentProps>;
+declare const Formyx: React.ComponentType<{}>;
+declare const Form: React.ComponentType<{}>;
+declare const InputField: React.ComponentType<InputFieldProps>;
+declare const useDebounce: UseDebounce;
+declare const useThrottle: UseThrottle;
 
-export { Form, Formyx, InputField };
-export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };
+export { Form, Formyx, InputField, useDebounce, useThrottle };
+export type { FieldConfig, FieldValue, FormConfig, FormData, FormState, InputFieldProps, InputType, UseDebounce, UseThrottle, ValidatedFieldConfig, ValidationResult, ValidationRule };
