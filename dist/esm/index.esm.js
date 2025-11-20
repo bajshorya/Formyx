@@ -458,9 +458,7 @@ const useThrottle = (fn, delay = 1000) => {
     }, [fn, delay]);
 };
 
-const InputField = ({ name, type = 'text', label, value, options = [], multiple = false, required = false, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-validation, error, touched = false, onChange, onBlur, className = '', style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = 'debounce', ...props }) => {
+const InputField = ({ name, type = 'text', label, value, options = [], multiple = false, required = false, error, touched = false, onChange, onBlur, className = '', style, placeholder, disabled = false, readOnly = false, autoFocus = false, autoComplete, min, max, step, pattern, rows = 4, accept, debounce = 300, throttle = 300, validationStrategy = 'debounce', ...props }) => {
     const debouncedValidation = useDebounce((name, value) => {
         onChange(name, value, true);
     }, debounce);
