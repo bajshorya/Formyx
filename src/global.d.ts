@@ -7,7 +7,13 @@ declare module "*.scss" {
   const content: { [className: string]: string };
   export default content;
 }
+
 declare module "@shoryabaj/formyx/style" {
+  const content: string;
+  export default content;
+}
+
+declare module "@shoryabaj/formyx/style.css" {
   const content: string;
   export default content;
 }

@@ -22,9 +22,9 @@ interface InputFieldProps extends Omit<ValidatedFieldConfig, "validate"> {
   pattern?: string;
   rows?: number;
   accept?: string;
-  debounce?: number; 
-  throttle?: number; 
-  validationStrategy?: "debounce" | "throttle" | "immediate"; 
+  debounce?: number;
+  throttle?: number;
+  validationStrategy?: "debounce" | "throttle" | "immediate";
 }
 
 const InputField: React.FC<InputFieldProps> = ({

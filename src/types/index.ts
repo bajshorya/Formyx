@@ -49,4 +49,7 @@ export interface InputFieldProps {
   pattern?: string;
   rows?: number;
   accept?: string;
+  debounce?: number;
+  throttle?: number;
+  validationStrategy?: "debounce" | "throttle" | "immediate";
 }

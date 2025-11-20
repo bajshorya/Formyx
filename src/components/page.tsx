@@ -3,7 +3,7 @@ import InputField from "./InputField";
 import type { FieldValue, FormData } from "../types";
 import { useDebounce, useThrottle } from "../hooks";
 
-const CustomForm = () => {
+const Form = () => {
   const [formData, setFormData] = useState<FormData>({
     username: "",
     email: "",
@@ -43,7 +43,7 @@ const CustomForm = () => {
   }, 300);
 
   const throttledPriceTracking = useThrottle((price: number) => {
-    setPriceHistory((prev) => [...prev.slice(-9), price]); 
+    setPriceHistory((prev) => [...prev.slice(-9), price]);
     console.log("Price changed to:", price);
   }, 200);
 
@@ -73,6 +73,17 @@ const CustomForm = () => {
       email: error,
     }));
   }, []);
+
+  const throttledUsernameCheck = useThrottle((username: string) => {
+    console.log("Checking username availability:", username);
+    const takenUsernames = ["admin", "user", "test"];
+    if (takenUsernames.includes(username.toLowerCase())) {
+      setErrors((prev) => ({
+        ...prev,
+        username: "Username is already taken",
+      }));
+    }
+  }, 800);
 
   const handleChange = (
     name: string,
@@ -132,17 +143,6 @@ const CustomForm = () => {
         break;
     }
   };
-
-  const throttledUsernameCheck = useThrottle((username: string) => {
-    console.log("Checking username availability:", username);
-    const takenUsernames = ["admin", "user", "test"];
-    if (takenUsernames.includes(username.toLowerCase())) {
-      setErrors((prev) => ({
-        ...prev,
-        username: "Username is already taken",
-      }));
-    }
-  }, 800);
 
   const handleBlur = (name: string, isTouched = true) => {
     if (isTouched) {
@@ -441,4 +441,4 @@ const CustomForm = () => {
   );
 };
 
-export default CustomForm;
+export default Form;

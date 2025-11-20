@@ -1,4 +1,3 @@
-// Basic field configuration
 interface FieldConfig {
   name: string;
   label?: string;
@@ -7,7 +6,6 @@ interface FieldConfig {
   dependencies?: string[];
 }
 
-// Input field types
 type InputType =
   | "text"
   | "email"
@@ -24,7 +22,6 @@ type InputType =
   | "datetime-local"
   | "custom";
 
-// Field value types
 type FieldValue =
   | string
   | number
@@ -35,10 +32,8 @@ type FieldValue =
   | null
   | undefined;
 
-// Form data structure
 type FormData = Record<string, FieldValue>;
 
-// Validation rules
 interface ValidationRule {
   required?: boolean | string;
   min?: number | string;
@@ -53,7 +48,6 @@ interface ValidationRule {
   message?: string;
 }
 
-// Field configuration with validation
 interface ValidatedFieldConfig extends FieldConfig {
   type?: InputType;
   validation?: ValidationRule;
@@ -61,14 +55,12 @@ interface ValidatedFieldConfig extends FieldConfig {
   multiple?: boolean;
 }
 
-// Validation result
 interface ValidationResult {
   isValid: boolean;
-  errors: Record<string, string | undefined>; // this maps field names to error messages, where names are keys and error messages are values, example { username: "Username is required", email: undefined }
-  touched: Record<string, boolean>; // this maps field names to touched status, where names are keys and booleans are values, example { username: true, email: false }
+  errors: Record<string, string | undefined>;
+  touched: Record<string, boolean>;
 }
 
-// Form state
 interface FormState {
   values: FormData;
   errors: Record<string, string | undefined>;
@@ -78,7 +70,6 @@ interface FormState {
   isDirty: boolean;
 }
 
-// Form configuration
 interface FormConfig {
   fields: Record<string, ValidatedFieldConfig>;
   initialValues?: FormData;

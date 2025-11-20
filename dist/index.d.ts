@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 interface FieldConfig {
     name: string;
     label?: string;
@@ -81,16 +79,20 @@ interface InputFieldProps {
     pattern?: string;
     rows?: number;
     accept?: string;
+    debounce?: number;
+    throttle?: number;
+    validationStrategy?: "debounce" | "throttle" | "immediate";
 }
 
 interface FormyxProps {
 }
 interface FormProps {
 }
-
+interface InputFieldComponentProps {
+}
 declare const Formyx: React.ComponentType<FormyxProps>;
-declare const CustomForm: React.ComponentType<FormProps>;
-declare const InputField: React.ComponentType<InputFieldProps>;
+declare const Form: React.ComponentType<FormProps>;
+declare const InputField: React.ComponentType<InputFieldComponentProps>;
 
-export { CustomForm, Formyx, InputField };
-export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldProps as InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };
+export { Form, Formyx, InputField };
+export type { FieldConfig, FieldValue, FormConfig, FormData, FormProps, FormState, FormyxProps, InputFieldComponentProps, InputFieldProps, InputType, ValidatedFieldConfig, ValidationResult, ValidationRule };

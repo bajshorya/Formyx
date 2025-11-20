@@ -1,18 +1,19 @@
+import React from "react";
+import Form from "./components/page";
 import InputField from "./components/InputField";
 import { useDebounce, useThrottle } from "./hooks";
 import "./styles/formyx.css";
-import CustomForm from "./components/page";
 
 const Formyx = () => {
   return (
     <div className="formyx-form">
       Formyx Library
-      <CustomForm />
+      <Form />
     </div>
   );
 };
 
-export { Formyx, CustomForm, InputField, useDebounce, useThrottle };
+export { Formyx, Form, InputField, useDebounce, useThrottle };
 
 export type {
   FieldConfig,
